@@ -167,6 +167,21 @@ contract HundredDollarsMars is ERC721, AccessControl {
         isNemberOf[nemberTokenId][leaderTokenId] = true;
     }
 
+    function granToTeamNemberByArray(uint256 leaderTokenId,uint256 [] memory nemberTokenId) public {
+
+        for(uint i; i < nemberTokenId.length; i ++) {
+            require(
+                _exists(nemberTokenId[i]),
+                "ERC721Metadata: URI query for nonexistent token"
+            );
+            require(ownerOf(leaderTokenId) == msg.sender, "not owner of leaderNFT");
+            require(isNemberOf[nemberTokenId[i]][leaderTokenId] == false, "alredy nember of you");
+            require(!(ownerOf(nemberTokenId[i]) == msg.sender), "nft of you balance");
+            nemberList[leaderTokenId].push(nemberTokenId[i]);
+            isNemberOf[nemberTokenId[i]][leaderTokenId] = true;
+        }
+    }
+
     function revokeToTeamNember(uint256 leaderTokenId,uint256 nemberTokenId) public {
         require(ownerOf(leaderTokenId) == msg.sender, "not owner of leaderNFT");
         require(isNemberOf[nemberTokenId][leaderTokenId] == true, "not nember of you");
@@ -177,6 +192,20 @@ contract HundredDollarsMars is ERC721, AccessControl {
             }
         }
         isNemberOf[nemberTokenId][leaderTokenId] = false;
+    }
+
+    function revokeToTeamNemberByArray(uint256 leaderTokenId,uint256 [] memory nemberTokenId) public {
+        for(uint j; j < nemberTokenId.length; j ++) {
+            require(ownerOf(leaderTokenId) == msg.sender, "not owner of leaderNFT");
+            require(isNemberOf[nemberTokenId[j]][leaderTokenId] == true, "not nember of you");
+            for(uint i; i < nemberList[leaderTokenId].length; i ++){
+                if(nemberList[leaderTokenId][i] == nemberTokenId[j]){
+                    nemberList[leaderTokenId][i] = nemberList[leaderTokenId][nemberList[leaderTokenId].length - 1];
+                    nemberList[leaderTokenId].pop();
+                }
+            }
+            isNemberOf[nemberTokenId[j]][leaderTokenId] = false;
+        }
     }
 
     function distributeERC20TokenForTeamNember(uint tokenId,uint tokenAmount,uint nemberAmount) public{
